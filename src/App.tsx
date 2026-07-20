@@ -33,7 +33,73 @@ const getYouTubeId = (url: string) => {
   return match && match[2].length === 11 ? match[2] : null;
 };
 
+const parseUrlHash = (url: string) => {
+  if (!url) return { cleanUrl: url, width: undefined, height: undefined, align: undefined };
+  try {
+    const hashIndex = url.indexOf('#');
+    if (hashIndex === -1) return { cleanUrl: url, width: undefined, height: undefined, align: undefined };
+    
+    const cleanUrl = url.substring(0, hashIndex);
+    const hash = url.substring(hashIndex + 1);
+    
+    let width: string | undefined = undefined;
+    let height: string | undefined = undefined;
+    let align: string | undefined = undefined;
+    
+    const params = hash.split(/[;&]/);
+    for (const param of params) {
+      const parts = param.split(/[=-]/);
+      const key = (parts[0] || '').trim().toLowerCase();
+      const val = (parts[1] || '').trim();
+      
+      if (key === 'w' || key === 'width') {
+        width = val.match(/^(?:[0-9]+)(?:%|px|vw|em|rem)?$/) 
+          ? (val.match(/[a-zA-Z%]/) ? val : `${val}%`)
+          : val;
+      } else if (key === 'h' || key === 'height') {
+        height = val.match(/^(?:[0-9]+)(?:%|px|vh|em|rem)?$/)
+          ? (val.match(/[a-zA-Z%]/) ? val : `${val}px`)
+          : val;
+      } else if (key === 'left' || key === 'right' || key === 'center') {
+        align = key;
+      } else if (val === 'left' || val === 'right' || val === 'center') {
+        align = val;
+      }
+    }
+    return { cleanUrl, width, height, align };
+  } catch (e) {
+    return { cleanUrl: url, width: undefined, height: undefined, align: undefined };
+  }
+};
+
 export default function App() {
+  // Theme State
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      setIsDarkMode(false);
+      document.documentElement.classList.add("light-mode");
+    } else {
+      setIsDarkMode(true);
+      document.documentElement.classList.remove("light-mode");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      setIsDarkMode(false);
+      localStorage.setItem("theme", "light");
+      document.documentElement.classList.add("light-mode");
+    } else {
+      setIsDarkMode(true);
+      localStorage.setItem("theme", "dark");
+      document.documentElement.classList.remove("light-mode");
+    }
+  };
+
   // Navigation & Router State
   const [activeView, setActiveView] = useState<"home" | "article" | "admin">("home");
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -253,10 +319,18 @@ export default function App() {
       </a>
     ),
     img: ({ src, alt, ...props }: any) => {
-      const youtubeId = getYouTubeId(src);
+      const { cleanUrl, width, height, align } = parseUrlHash(src);
+      const youtubeId = getYouTubeId(cleanUrl);
       if (youtubeId) {
         return (
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-xl my-6 bg-slate-950">
+          <div
+            className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-xl my-6 bg-slate-950"
+            style={{
+              width: width || '100%',
+              marginLeft: align === 'right' ? 'auto' : align === 'left' ? '0' : 'auto',
+              marginRight: align === 'left' ? 'auto' : align === 'right' ? '0' : 'auto'
+            }}
+          >
             <iframe
               src={`https://www.youtube.com/embed/${youtubeId}`}
               title={alt || "YouTube video player"}
@@ -269,11 +343,19 @@ export default function App() {
         );
       }
       return (
-        <span className="block my-6 space-y-2">
+        <span
+          className="block my-6 space-y-2"
+          style={{
+            width: width || '100%',
+            marginLeft: align === 'right' ? 'auto' : align === 'left' ? '0' : 'auto',
+            marginRight: align === 'left' ? 'auto' : align === 'right' ? '0' : 'auto'
+          }}
+        >
           <img
-            src={src}
+            src={cleanUrl}
             alt={alt}
-            className="w-full rounded-2xl border border-white/10 shadow-lg object-cover max-h-[480px]"
+            className="w-full rounded-2xl border border-white/10 shadow-lg object-cover"
+            style={{ height: height || 'auto', maxHeight: height ? 'none' : '480px' }}
             referrerPolicy="no-referrer"
             {...props}
           />
@@ -292,7 +374,13 @@ export default function App() {
 
   // ── Admin view: full page takeover ─────────────────────────────────────────
   if (activeView === "admin") {
-    return <AdminPanel onDataChange={handleDataChange} />;
+    return (
+      <AdminPanel
+        onDataChange={handleDataChange}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
+      />
+    );
   }
 
   // ── Public site view ────────────────────────────────────────────────────────
@@ -309,6 +397,8 @@ export default function App() {
         onSearchChange={(q) => setSearchQuery(q === "" ? " " : q)}
         onGoHome={goHome}
         isSinglePostView={activeView === "article"}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Container */}
@@ -589,14 +679,14 @@ export default function App() {
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
             <span className="text-xs font-black tracking-wider uppercase text-slate-400">
-              AI YANGILIKLARI
+              AI BLOG
             </span>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
             Sun'iy intellekt va eng so'nggi texnologiyalar olami yangiliklarini boshqarish tizimi bilan taqdim etuvchi zamonaviy blog platformasi.
           </p>
           <div className="pt-2 text-[11px] text-slate-600 font-mono">
-            <span>© 2026 AI Yangiliklari</span>
+            <span>© 2026 AI Blog</span>
           </div>
         </div>
       </footer>

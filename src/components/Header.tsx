@@ -1,11 +1,13 @@
 import React from "react";
-import { Search, Sparkles, X } from "lucide-react";
+import { Search, Sparkles, X, Sun, Moon } from "lucide-react";
 
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onGoHome: () => void;
   isSinglePostView: boolean;
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
 }
 
 export default function Header({
@@ -13,9 +15,11 @@ export default function Header({
   onSearchChange,
   onGoHome,
   isSinglePostView,
+  isDarkMode,
+  onToggleTheme,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/40 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/40 backdrop-blur-md transition-colors duration-300">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Logo and Brand */}
@@ -28,10 +32,7 @@ export default function Header({
           </div>
           <div className="flex flex-col">
             <span className="text-xs sm:text-sm font-black tracking-wider text-slate-100 font-sans uppercase">
-              AI YANGILIKLARI
-            </span>
-            <span className="text-[9px] sm:text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-widest leading-none">
-              Headless Blog
+              AI BLOG
             </span>
           </div>
         </div>
@@ -60,9 +61,19 @@ export default function Header({
           )}
         </div>
 
-        {/* Right Side: empty placeholder for balance */}
+        {/* Right Side: Theme Toggle Switch */}
         <div className="flex items-center">
-          {/* Admin panelga kirish uchun: /#/admin */}
+          <button
+            onClick={onToggleTheme}
+            className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-white transition-all cursor-pointer backdrop-blur-sm"
+            title={isDarkMode ? "Kunduzgi rejim (Light mode)" : "Tungi rejim (Dark mode)"}
+          >
+            {isDarkMode ? (
+              <Sun className="h-4.5 w-4.5 text-amber-400 animate-pulse" />
+            ) : (
+              <Moon className="h-4.5 w-4.5 text-indigo-400" />
+            )}
+          </button>
         </div>
       </div>
 

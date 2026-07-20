@@ -26,6 +26,8 @@ import {
   Youtube,
   Code,
   Archive,
+  Sun,
+  Moon,
 } from "lucide-react";
 import Markdown from "react-markdown";
 
@@ -34,6 +36,45 @@ const getYouTubeId = (url: string) => {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
+};
+
+const parseUrlHash = (url: string) => {
+  if (!url) return { cleanUrl: url, width: undefined, height: undefined, align: undefined };
+  try {
+    const hashIndex = url.indexOf('#');
+    if (hashIndex === -1) return { cleanUrl: url, width: undefined, height: undefined, align: undefined };
+    
+    const cleanUrl = url.substring(0, hashIndex);
+    const hash = url.substring(hashIndex + 1);
+    
+    let width: string | undefined = undefined;
+    let height: string | undefined = undefined;
+    let align: string | undefined = undefined;
+    
+    const params = hash.split(/[;&]/);
+    for (const param of params) {
+      const parts = param.split(/[=-]/);
+      const key = (parts[0] || '').trim().toLowerCase();
+      const val = (parts[1] || '').trim();
+      
+      if (key === 'w' || key === 'width') {
+        width = val.match(/^(?:[0-9]+)(?:%|px|vw|em|rem)?$/) 
+          ? (val.match(/[a-zA-Z%]/) ? val : `${val}%`)
+          : val;
+      } else if (key === 'h' || key === 'height') {
+        height = val.match(/^(?:[0-9]+)(?:%|px|vh|em|rem)?$/)
+          ? (val.match(/[a-zA-Z%]/) ? val : `${val}px`)
+          : val;
+      } else if (key === 'left' || key === 'right' || key === 'center') {
+        align = key;
+      } else if (val === 'left' || val === 'right' || val === 'center') {
+        align = val;
+      }
+    }
+    return { cleanUrl, width, height, align };
+  } catch (e) {
+    return { cleanUrl: url, width: undefined, height: undefined, align: undefined };
+  }
 };
 
 const markdownComponents = {
@@ -114,10 +155,18 @@ const markdownComponents = {
     </a>
   ),
   img: ({ src, alt, ...props }: any) => {
-    const youtubeId = getYouTubeId(src);
+    const { cleanUrl, width, height, align } = parseUrlHash(src);
+    const youtubeId = getYouTubeId(cleanUrl);
     if (youtubeId) {
       return (
-        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-xl my-6 bg-slate-950">
+        <div
+          className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-xl my-6 bg-slate-950"
+          style={{
+            width: width || '100%',
+            marginLeft: align === 'right' ? 'auto' : align === 'left' ? '0' : 'auto',
+            marginRight: align === 'left' ? 'auto' : align === 'right' ? '0' : 'auto'
+          }}
+        >
           <iframe
             src={`https://www.youtube.com/embed/${youtubeId}`}
             title={alt || "YouTube video player"}
@@ -130,11 +179,19 @@ const markdownComponents = {
       );
     }
     return (
-      <span className="block my-6 space-y-2">
+      <span
+        className="block my-6 space-y-2"
+        style={{
+          width: width || '100%',
+          marginLeft: align === 'right' ? 'auto' : align === 'left' ? '0' : 'auto',
+          marginRight: align === 'left' ? 'auto' : align === 'right' ? '0' : 'auto'
+        }}
+      >
         <img
-          src={src}
+          src={cleanUrl}
           alt={alt}
-          className="w-full rounded-2xl border border-white/10 shadow-lg object-cover max-h-[480px]"
+          className="w-full rounded-2xl border border-white/10 shadow-lg object-cover"
+          style={{ height: height || 'auto', maxHeight: height ? 'none' : '480px' }}
           referrerPolicy="no-referrer"
           {...props}
         />
@@ -220,7 +277,7 @@ function AdminLoginScreen({ onSuccess }: { onSuccess: () => void }) {
             </div>
             <div>
               <h1 className="text-xl font-black tracking-wider text-slate-100 uppercase">
-                AI YANGILIKLARI
+                AI BLOG
               </h1>
               <p className="text-xs font-mono text-cyan-400 uppercase tracking-widest mt-0.5">
                 Admin Panel
@@ -303,7 +360,7 @@ function AdminLoginScreen({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Footer note */}
         <p className="text-center text-[10px] text-slate-600 mt-6 font-mono">
-          © 2026 AI Yangiliklari · Yashirin Admin Panel
+          © 2026 AI Blog · Yashirin Admin Panel
         </p>
       </div>
     </div>
@@ -312,7 +369,13 @@ function AdminLoginScreen({ onSuccess }: { onSuccess: () => void }) {
 
 // ─── ADMIN PANEL (authenticated) ──────────────────────────────────────────────
 
-export default function AdminPanel({ onDataChange }: { onDataChange: () => void }) {
+interface AdminPanelProps {
+  onDataChange: () => void;
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
+}
+
+export default function AdminPanel({ onDataChange, isDarkMode, onToggleTheme }: AdminPanelProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<"articles" | "categories">("articles");
 
@@ -543,7 +606,7 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
             </div>
             <div>
               <p className="text-xs font-black tracking-wider text-slate-100 uppercase">
-                AI YANGILIKLARI
+                AI BLOG
               </p>
               <p className="text-[9px] font-mono text-cyan-400 uppercase tracking-widest">
                 Boshqaruv Paneli
@@ -552,6 +615,17 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
           </div>
 
           <div className="flex items-center space-x-3">
+            <button
+              onClick={onToggleTheme}
+              className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-white transition-all cursor-pointer backdrop-blur-sm"
+              title={isDarkMode ? "Kunduzgi rejim (Light mode)" : "Tungi rejim (Dark mode)"}
+            >
+              {isDarkMode ? (
+                <Sun className="h-3.5 w-3.5 text-amber-400" />
+              ) : (
+                <Moon className="h-3.5 w-3.5 text-indigo-400" />
+              )}
+            </button>
             <button
               onClick={() => { window.location.hash = ""; }}
               className="px-3.5 py-1.5 text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer"
