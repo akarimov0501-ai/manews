@@ -31,7 +31,7 @@ export default function Header({
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs sm:text-sm font-black tracking-wider text-slate-100 font-sans uppercase">
+            <span className="text-xs sm:text-sm font-bold tracking-wider text-slate-100 font-sans uppercase">
               AI BLOG
             </span>
           </div>

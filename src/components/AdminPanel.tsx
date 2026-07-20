@@ -79,7 +79,7 @@ const parseUrlHash = (url: string) => {
 
 const markdownComponents = {
   h1: ({ children, ...props }: any) => (
-    <h1 className="text-3xl font-extrabold text-slate-100 mt-8 mb-4 tracking-tight border-b border-slate-800 pb-2 font-sans" {...props}>
+    <h1 className="text-3xl font-bold text-slate-100 mt-8 mb-4 tracking-tight border-b border-slate-800 pb-2 font-sans" {...props}>
       {children}
     </h1>
   ),
@@ -276,7 +276,7 @@ function AdminLoginScreen({ onSuccess }: { onSuccess: () => void }) {
               </div>
             </div>
             <div>
-              <h1 className="text-xl font-black tracking-wider text-slate-100 uppercase">
+              <h1 className="text-xl font-bold tracking-wider text-slate-100 uppercase">
                 AI BLOG
               </h1>
               <p className="text-xs font-mono text-cyan-400 uppercase tracking-widest mt-0.5">
@@ -605,7 +605,7 @@ export default function AdminPanel({ onDataChange, isDarkMode, onToggleTheme }: 
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-xs font-black tracking-wider text-slate-100 uppercase">
+              <p className="text-xs font-bold tracking-wider text-slate-100 uppercase">
                 AI BLOG
               </p>
               <p className="text-[9px] font-mono text-cyan-400 uppercase tracking-widest">
@@ -908,7 +908,7 @@ export default function AdminPanel({ onDataChange, isDarkMode, onToggleTheme }: 
                           {categories.find((c) => c.slug === formCategorySlug)?.name || ""}
                         </span>
                       )}
-                      <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+                      <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
                         {formArticle.title || "Sarlavha belgilanmagan"}
                       </h1>
                     </div>
@@ -959,26 +959,44 @@ export default function AdminPanel({ onDataChange, isDarkMode, onToggleTheme }: 
                         </select>
                       </div>
 
-                      {/* Author Name */}
-                      <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono font-bold">Muallif Ismi</label>
-                        <input
-                          type="text"
-                          placeholder="Muallif ismi..."
-                          value={formArticle.author?.name || ""}
-                          onChange={(e) =>
-                            setFormArticle({
-                              ...formArticle,
-                              author: {
-                                name: e.target.value,
-                                avatarUrl:
-                                  formArticle.author?.avatarUrl ||
-                                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop",
-                              },
-                            })
-                          }
-                          className="w-full px-3 py-2 bg-white/5 border border-white/10 focus:border-cyan-500 rounded-xl focus:outline-none text-xs text-white"
-                        />
+                      {/* Author Name & Avatar */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-slate-400 uppercase font-mono font-bold">Muallif Ismi</label>
+                          <input
+                            type="text"
+                            placeholder="Muallif ismi..."
+                            value={formArticle.author?.name || ""}
+                            onChange={(e) =>
+                              setFormArticle({
+                                ...formArticle,
+                                author: {
+                                  name: e.target.value,
+                                  avatarUrl: formArticle.author?.avatarUrl,
+                                },
+                              })
+                            }
+                            className="w-full px-3 py-2 bg-white/5 border border-white/10 focus:border-cyan-500 rounded-xl focus:outline-none text-xs text-white"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] text-slate-400 uppercase font-mono font-bold">Muallif Rasmi URL (Ixtiyoriy)</label>
+                          <input
+                            type="text"
+                            placeholder="https://..."
+                            value={formArticle.author?.avatarUrl || ""}
+                            onChange={(e) =>
+                              setFormArticle({
+                                ...formArticle,
+                                author: {
+                                  name: formArticle.author?.name || "",
+                                  avatarUrl: e.target.value,
+                                },
+                              })
+                            }
+                            className="w-full px-3 py-2 bg-white/5 border border-white/10 focus:border-cyan-500 rounded-xl focus:outline-none text-xs text-white"
+                          />
+                        </div>
                       </div>
                     </div>
 

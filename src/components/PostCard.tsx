@@ -92,12 +92,14 @@ export default function PostCard({ article, onClick }: PostCardProps) {
         {/* Card Footer: Author & Published Date */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
           <div className="flex items-center space-x-2.5">
-            <img
-              src={article.author.avatarUrl}
-              alt={article.author.name}
-              className="w-7 h-7 rounded-full object-cover border border-white/10"
-              referrerPolicy="no-referrer"
-            />
+            {article.author.avatarUrl && (
+              <img
+                src={article.author.avatarUrl}
+                alt={article.author.name}
+                className="w-7 h-7 rounded-full object-cover border border-white/10"
+                referrerPolicy="no-referrer"
+              />
+            )}
             <span className="text-xs font-medium text-slate-300 truncate max-w-[120px]">
               {article.author.name}
             </span>

@@ -19,7 +19,7 @@ export interface Article {
   } | null;
   author: {
     name: string;
-    avatarUrl: string;
+    avatarUrl?: string;
   };
   isArchived?: boolean;
 }

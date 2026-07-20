@@ -33,39 +33,39 @@
 
 /* Custom global overrides */
 :root {
-  --bg-color: #020617; /* slate-950 */
-  --text-color: #f1f5f9; /* slate-100 */
+  --bg-color: #0f172a; /* softer dark: slate-900 instead of slate-950 */
+  --text-color: #e2e8f0; /* softer text: slate-200 */
   
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-hover-border: rgba(255, 255, 255, 0.15);
-  --card-hover-bg: rgba(255, 255, 255, 0.06);
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-hover-border: rgba(255, 255, 255, 0.12);
+  --card-hover-bg: rgba(255, 255, 255, 0.08);
   
   --text-muted: #94a3b8; /* slate-400 */
-  --text-article-title: #f8fafc; /* slate-50 */
+  --text-article-title: #f1f5f9; /* slate-100 */
   --text-article-body: #cbd5e1; /* slate-300 */
   
-  --mesh-opacity: 0.12;
-  --header-bg: rgba(0, 0, 0, 0.4);
-  --footer-bg: rgba(0, 0, 0, 0.4);
+  --mesh-opacity: 0.1;
+  --header-bg: rgba(15, 23, 42, 0.6);
+  --footer-bg: rgba(15, 23, 42, 0.6);
 }
 
 :root.light-mode {
-  --bg-color: #f8fafc; /* slate-50 */
-  --text-color: #0f172a; /* slate-900 */
+  --bg-color: #ffffff; /* cleaner white */
+  --text-color: #334155; /* softer text: slate-700 instead of slate-900 */
   
-  --card-bg: rgba(15, 23, 42, 0.03);
-  --card-border: rgba(15, 23, 42, 0.08);
-  --card-hover-border: rgba(15, 23, 42, 0.15);
-  --card-hover-bg: rgba(15, 23, 42, 0.05);
+  --card-bg: rgba(0, 0, 0, 0.02);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-hover-border: rgba(0, 0, 0, 0.12);
+  --card-hover-bg: rgba(0, 0, 0, 0.04);
   
-  --text-muted: #475569; /* slate-600 */
-  --text-article-title: #0f172a; /* slate-900 */
-  --text-article-body: #334155; /* slate-700 */
+  --text-muted: #64748b; /* slate-500 */
+  --text-article-title: #1e293b; /* slate-800 */
+  --text-article-body: #475569; /* slate-600 */
   
-  --mesh-opacity: 0.06;
-  --header-bg: rgba(255, 255, 255, 0.7);
-  --footer-bg: rgba(241, 245, 249, 0.8); /* slate-100 */
+  --mesh-opacity: 0.04;
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --footer-bg: rgba(248, 250, 252, 0.9);
 }
 
 body {

@@ -226,7 +226,7 @@ export default function App() {
   const markdownComponents = {
     h1: ({ children, ...props }: any) => (
       <h1
-        className="text-3xl font-extrabold text-slate-100 mt-8 mb-4 tracking-tight border-b border-slate-800 pb-2 font-sans"
+        className="text-3xl font-bold text-slate-100 mt-8 mb-4 tracking-tight border-b border-slate-800 pb-2 font-sans"
         {...props}
       >
         {children}
@@ -426,18 +426,20 @@ export default function App() {
                     {activeArticle.category.name}
                   </span>
                 )}
-                <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-100 tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-4xl font-bold text-slate-100 tracking-tight leading-tight">
                   {activeArticle.title}
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-4 py-2 text-slate-400 border-t border-white/5 pt-6 mt-6">
                   <div className="flex items-center space-x-3">
-                    <img
-                      src={activeArticle.author.avatarUrl}
-                      alt={activeArticle.author.name}
-                      className="w-10 h-10 rounded-full object-cover border border-white/10"
-                      referrerPolicy="no-referrer"
-                    />
+                    {activeArticle.author.avatarUrl && (
+                      <img
+                        src={activeArticle.author.avatarUrl}
+                        alt={activeArticle.author.name}
+                        className="w-10 h-10 rounded-full object-cover border border-white/10"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
                     <div>
                       <p className="text-sm font-semibold text-slate-200">{activeArticle.author.name}</p>
                       <p className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Muallif</p>
@@ -549,7 +551,7 @@ export default function App() {
                       )}
                     </div>
 
-                    <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-snug group-hover:text-indigo-300 transition-colors duration-200">
+                    <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-snug group-hover:text-indigo-300 transition-colors duration-200">
                       {featuredArticle.title}
                     </h2>
 
@@ -559,12 +561,14 @@ export default function App() {
 
                     <div className="flex flex-wrap items-center justify-between pt-4 border-t border-white/5 gap-4">
                       <div className="flex items-center space-x-3">
-                        <img
-                          src={featuredArticle.author.avatarUrl}
-                          alt={featuredArticle.author.name}
-                          className="w-9 h-9 rounded-full object-cover border border-white/10"
-                          referrerPolicy="no-referrer"
-                        />
+                        {featuredArticle.author.avatarUrl && (
+                          <img
+                            src={featuredArticle.author.avatarUrl}
+                            alt={featuredArticle.author.name}
+                            className="w-8 h-8 rounded-full object-cover border border-white/10"
+                            referrerPolicy="no-referrer"
+                          />
+                        )}
                         <div>
                           <p className="text-xs font-semibold text-slate-100">{featuredArticle.author.name}</p>
                           <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Muallif</p>
@@ -678,7 +682,7 @@ export default function App() {
             <div className="h-6 w-6 rounded-md bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="text-xs font-black tracking-wider uppercase text-slate-400">
+            <span className="text-xs font-bold tracking-wider uppercase text-slate-400">
               AI BLOG
             </span>
           </div>
