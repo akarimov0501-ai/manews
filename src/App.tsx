@@ -61,7 +61,7 @@ export default function App() {
     const handleHashChange = () => {
       const hash = window.location.hash;
 
-      if (hash === "#/admin") {
+      if (hash === "#/adminai") {
         // Admin sahifasiga yo'naltirish
         setActiveView("admin");
         setActiveSlug(null);

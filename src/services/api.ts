@@ -294,7 +294,8 @@ initDatabase();
 // Load Articles
 export async function getArticles(
   categorySlug?: string,
-  searchQuery?: string
+  searchQuery?: string,
+  includeArchived = false
 ): Promise<{ data: Article[]; error: string | null }> {
   initDatabase();
   
@@ -304,6 +305,11 @@ export async function getArticles(
   try {
     const raw = localStorage.getItem("local_articles") || "[]";
     let articles: Article[] = JSON.parse(raw);
+
+    // Apply archiving filter
+    if (!includeArchived) {
+      articles = articles.filter((article) => article.isArchived !== true);
+    }
 
     // Apply category filtering
     if (categorySlug && categorySlug !== "all") {
@@ -457,6 +463,7 @@ export async function saveArticle(articleInput: Partial<Article>): Promise<{ suc
         category: articleInput.category !== undefined ? articleInput.category : existing.category,
         readingTime,
         author: articleInput.author || existing.author || defaultAuthor,
+        isArchived: articleInput.isArchived !== undefined ? articleInput.isArchived : existing.isArchived,
       };
 
       articles[idx] = updated;
@@ -480,6 +487,7 @@ export async function saveArticle(articleInput: Partial<Article>): Promise<{ suc
         readingTime,
         category: articleInput.category || null,
         author: articleInput.author || defaultAuthor,
+        isArchived: articleInput.isArchived || false,
       };
 
       // Add as first element or push

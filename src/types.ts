@@ -21,4 +21,5 @@ export interface Article {
     name: string;
     avatarUrl: string;
   };
+  isArchived?: boolean;
 }

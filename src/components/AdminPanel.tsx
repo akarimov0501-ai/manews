@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   Youtube,
   Code,
+  Archive,
 } from "lucide-react";
 import Markdown from "react-markdown";
 
@@ -369,7 +370,7 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
 
   // Load data when authenticated
   const loadData = async () => {
-    const artRes = await getArticles();
+    const artRes = await getArticles(undefined, undefined, true);
     if (artRes.data) setArticles(artRes.data);
     const catRes = await getCategories();
     if (catRes.data) setCategories(catRes.data);
@@ -503,12 +504,15 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
     }
   };
 
-  const handleResetDefaults = () => {
-    if (window.confirm("Barcha maqolalar va turkumlarni o'chirib, dastlabki holatga qaytarmoqchimisiz? Siz kiritgan ma'lumotlar o'chib ketadi!")) {
-      resetToDefaults();
-      showToast("Ma'lumotlar dastlabki holatga muvaffaqiyatli qaytarildi!");
+  const handleToggleArchiveArticle = async (article: Article) => {
+    const nextArchived = !article.isArchived;
+    const res = await saveArticle({ id: article.id, isArchived: nextArchived });
+    if (res.success) {
+      showToast(nextArchived ? "Maqola arxivlandi" : "Maqola arxivdan chiqarildi");
       loadData();
       onDataChange();
+    } else {
+      showToast(res.error || "Xatolik yuz berdi", "error");
     }
   };
 
@@ -548,14 +552,6 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
           </div>
 
           <div className="flex items-center space-x-3">
-            <button
-              onClick={handleResetDefaults}
-              className="px-3.5 py-1.5 text-xs bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/30 text-slate-300 hover:text-rose-400 rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer"
-              title="Dastlabki holatga qaytarish"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Dastlabki holat</span>
-            </button>
             <button
               onClick={() => { window.location.hash = ""; }}
               className="px-3.5 py-1.5 text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer"
@@ -663,6 +659,11 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
                                 <span className="font-mono text-[10px] bg-white/5 px-2 py-0.5 rounded border border-white/5 text-cyan-400">
                                   {art.category ? art.category.name : "Kategoriyasiz"}
                                 </span>
+                                {art.isArchived && (
+                                  <span className="font-mono text-[10px] bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 rounded text-amber-400 font-semibold uppercase tracking-wider">
+                                    Arxivlangan
+                                  </span>
+                                )}
                                 <span>•</span>
                                 <span>{art.readingTime}</span>
                                 <span>•</span>
@@ -672,6 +673,17 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
                           </div>
 
                           <div className="flex items-center space-x-2 sm:shrink-0 w-full sm:w-auto justify-end">
+                            <button
+                              onClick={() => handleToggleArchiveArticle(art)}
+                              className={`p-2 bg-white/5 border border-white/10 rounded-xl transition-all cursor-pointer ${
+                                art.isArchived
+                                  ? "hover:bg-amber-600/20 text-amber-400 border-amber-500/20"
+                                  : "hover:bg-indigo-600/20 text-slate-300 hover:text-white"
+                              }`}
+                              title={art.isArchived ? "Arxivdan chiqarish" : "Arxivlash"}
+                            >
+                              <Archive className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               onClick={() => handleOpenEditArticle(art)}
                               className="p-2 bg-white/5 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-400 border border-white/10 hover:border-indigo-500/20 rounded-xl transition-all cursor-pointer"
