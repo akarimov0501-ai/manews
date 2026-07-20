@@ -58,10 +58,10 @@ function AdminLoginScreen({ onSuccess }: { onSuccess: () => void }) {
     // Brief loading animation
     await new Promise((r) => setTimeout(r, 600));
 
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+    const adminPassword = import.meta.env.ADMIN_PASSWORD;
 
     if (!adminPassword) {
-      setError("VITE_ADMIN_PASSWORD muhit o'zgaruvchisi sozlanmagan.");
+      setError("ADMIN_PASSWORD muhit o'zgaruvchisi sozlanmagan.");
       setIsLoading(false);
       return;
     }
