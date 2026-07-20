@@ -20,7 +20,128 @@ import {
   ShieldAlert,
   Eye as EyeIcon,
   EyeOff,
+  Bold,
+  Italic,
+  Image as ImageIcon,
+  Youtube,
+  Code,
 } from "lucide-react";
+import Markdown from "react-markdown";
+
+const getYouTubeId = (url: string) => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+const markdownComponents = {
+  h1: ({ children, ...props }: any) => (
+    <h1 className="text-3xl font-extrabold text-slate-100 mt-8 mb-4 tracking-tight border-b border-slate-800 pb-2 font-sans" {...props}>
+      {children}
+    </h1>
+  ),
+  h2: ({ children, ...props }: any) => (
+    <h2 className="text-2xl font-bold text-slate-100 mt-7 mb-4 tracking-tight font-sans" {...props}>
+      {children}
+    </h2>
+  ),
+  h3: ({ children, ...props }: any) => (
+    <h3 className="text-xl font-semibold text-slate-200 mt-5 mb-3 font-sans" {...props}>
+      {children}
+    </h3>
+  ),
+  p: ({ children, ...props }: any) => (
+    <p className="text-slate-300 text-base leading-relaxed mb-5" {...props}>
+      {children}
+    </p>
+  ),
+  ul: ({ children, ...props }: any) => (
+    <ul className="list-disc pl-6 mb-5 space-y-2 text-slate-300" {...props}>
+      {children}
+    </ul>
+  ),
+  ol: ({ children, ...props }: any) => (
+    <ol className="list-decimal pl-6 mb-5 space-y-2 text-slate-300" {...props}>
+      {children}
+    </ol>
+  ),
+  li: ({ children, ...props }: any) => (
+    <li className="text-slate-300 leading-relaxed" {...props}>
+      {children}
+    </li>
+  ),
+  blockquote: ({ children, ...props }: any) => (
+    <blockquote className="border-l-4 border-indigo-500 pl-4 py-2 my-5 bg-slate-900/60 rounded-r-xl italic text-slate-400" {...props}>
+      {children}
+    </blockquote>
+  ),
+  code: ({ children, className, ...props }: any) => {
+    const isInline = !className;
+    return isInline ? (
+      <code className="bg-slate-900 px-1.5 py-0.5 rounded text-indigo-400 font-mono text-xs border border-slate-800" {...props}>
+        {children}
+      </code>
+    ) : (
+      <pre className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto my-6 font-mono text-xs leading-relaxed text-slate-300">
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </pre>
+    );
+  },
+  table: ({ children, ...props }: any) => (
+    <div className="overflow-x-auto my-6 rounded-xl border border-slate-800 bg-slate-900/20">
+      <table className="w-full border-collapse text-sm" {...props}>
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children, ...props }: any) => (
+    <th className="bg-slate-900/80 border-b border-slate-800 px-4 py-3 text-left font-semibold text-slate-200" {...props}>
+      {children}
+    </th>
+  ),
+  td: ({ children, ...props }: any) => (
+    <td className="border-b border-slate-800/50 px-4 py-3 text-slate-300" {...props}>
+      {children}
+    </td>
+  ),
+  a: ({ children, ...props }: any) => (
+    <a className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors font-medium" {...props}>
+      {children}
+    </a>
+  ),
+  img: ({ src, alt, ...props }: any) => {
+    const youtubeId = getYouTubeId(src);
+    if (youtubeId) {
+      return (
+        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-xl my-6 bg-slate-950">
+          <iframe
+            src={`https://www.youtube.com/embed/${youtubeId}`}
+            title={alt || "YouTube video player"}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
+        </div>
+      );
+    }
+    return (
+      <span className="block my-6 space-y-2">
+        <img
+          src={src}
+          alt={alt}
+          className="w-full rounded-2xl border border-white/10 shadow-lg object-cover max-h-[480px]"
+          referrerPolicy="no-referrer"
+          {...props}
+        />
+        {alt && <span className="block text-center text-xs text-slate-500 font-sans italic">{alt}</span>}
+      </span>
+    );
+  },
+};
 import { Article, Category } from "../types";
 import {
   getArticles,
@@ -213,6 +334,30 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
 
   // Feedback Messages
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  // Textarea Ref for formatting insert
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  const insertAtCursor = (before: string, after: string, defaultPlaceholder: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end);
+    const contentToInsert = selectedText || defaultPlaceholder;
+    const replacement = before + contentToInsert + after;
+
+    const newContent = text.substring(0, start) + replacement + text.substring(end);
+    setFormArticle((prev) => ({ ...prev, content: newContent }));
+
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + before.length + contentToInsert.length + after.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 50);
+  };
 
   // Check session on mount
   useEffect(() => {
@@ -689,8 +834,10 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
                         {formArticle.excerpt}
                       </p>
                     )}
-                    <div className="prose prose-invert prose-slate max-w-none text-slate-300 text-xs sm:text-sm whitespace-pre-wrap leading-relaxed">
-                      {formArticle.content || "*Maqola matni bo'sh*"}
+                    <div className="markdown-body">
+                      <Markdown components={markdownComponents}>
+                        {formArticle.content || "*Maqola matni bo'sh*"}
+                      </Markdown>
                     </div>
                   </div>
                 ) : (
@@ -794,9 +941,72 @@ export default function AdminPanel({ onDataChange }: { onDataChange: () => void 
                     </div>
 
                     {/* Content */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-400 uppercase font-mono font-bold">Maqola Matni (Markdown)</label>
+                    <div className="space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
+                        <label className="text-[10px] text-slate-400 uppercase font-mono font-bold">
+                          Maqola Matni (Markdown)
+                        </label>
+                        
+                        {/* Editor Toolbar */}
+                        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1 self-start sm:self-auto">
+                          <button
+                            type="button"
+                            onClick={() => insertAtCursor("**", "**", "qalin matn")}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+                            title="Qalin (Bold)"
+                          >
+                            <Bold className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => insertAtCursor("*", "*", "kursiv matn")}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+                            title="Kursiv (Italic)"
+                          >
+                            <Italic className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => insertAtCursor("```javascript\n", "\n```", "// kodlar")}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+                            title="Kod bloki (Code Block)"
+                          >
+                            <Code className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="w-px h-4 bg-white/10 mx-0.5" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const url = window.prompt("Rasm URL manzilini kiriting:", "https://images.unsplash.com/photo-1677442136019-21780efad99a");
+                              const alt = window.prompt("Rasm tavsifini yozing (alt):", "Rasm tavsifi");
+                              if (url) {
+                                insertAtCursor(`![${alt || "Rasm tavsifi"}](${url}`, ")", "");
+                              }
+                            }}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-indigo-400 transition-colors cursor-pointer flex items-center space-x-1"
+                            title="Rasm qo'shish"
+                          >
+                            <ImageIcon className="w-3.5 h-3.5" />
+                            <span className="text-[9px] font-bold hidden sm:inline">Rasm</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const url = window.prompt("YouTube video havolasini kiriting:\n(Masalan: https://www.youtube.com/watch?v=dQw4w9WgXcQ)");
+                              if (url) {
+                                insertAtCursor(`![youtube](${url}`, ")", "");
+                              }
+                            }}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-rose-400 transition-colors cursor-pointer flex items-center space-x-1"
+                            title="YouTube video"
+                          >
+                            <Youtube className="w-3.5 h-3.5 text-rose-500" />
+                            <span className="text-[9px] font-bold hidden sm:inline">YouTube</span>
+                          </button>
+                        </div>
+                      </div>
                       <textarea
+                        ref={textareaRef}
                         placeholder="Maqolangizni Markdown formatida bu yerga yozing..."
                         value={formArticle.content || ""}
                         onChange={(e) => setFormArticle({ ...formArticle, content: e.target.value })}
